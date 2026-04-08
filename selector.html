@@ -154,7 +154,7 @@ function parseParams(){
   const u=new URLSearchParams(location.search);
   P={cms:+(u.get("cms"))||5,income:u.get("income")||"general",b3:+(u.get("b3"))||40000,
      copay:+(u.get("copay"))||.3,guild:u.get("guild")||"",channel:u.get("channel")||"",
-     webhook:u.get("wh")||""};
+     webhook:u.get("wh")||"",result_channel:u.get("result_channel")||""};
   const im={low:"低收入戶",mid_low:"中低收入戶",general:"一般戶"};
   document.getElementById("i-cms").textContent="第 "+P.cms+" 級";
   document.getElementById("i-inc").textContent=im[P.income]||P.income;
@@ -254,8 +254,9 @@ document.getElementById("sbtn").addEventListener("click",async function(){
   document.getElementById("loading").classList.remove("show");
   const rp=document.getElementById("rp");rp.classList.add("show");
   if(!ok)rp.querySelector("div:nth-child(2)").textContent="⚠️ 自動送出失敗，請複製推薦碼貼回 Discord";
-  if(P.guild&&P.channel){
-    document.getElementById("dlink").href="discord:///channels/"+P.guild+"/"+P.channel;
+  if(P.guild){
+    const jumpCh=P.result_channel||P.channel;
+    if(jumpCh) document.getElementById("dlink").href="discord:///channels/"+P.guild+"/"+jumpCh;
   }
   rp.scrollIntoView({behavior:"smooth"});
 });
