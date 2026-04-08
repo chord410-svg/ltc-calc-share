@@ -5,502 +5,267 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長照 2.0 輔具選配</title>
 <style>
-  :root {
-    --primary: #3498db;
-    --success: #27ae60;
-    --warning: #f39c12;
-    --danger: #e74c3c;
-    --bg: #1a1a2e;
-    --card: #16213e;
-    --text: #eee;
-    --muted: #aaa;
-    --border: #2a3a5c;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, "Noto Sans TC", sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 16px;
-  }
-  .container { max-width: 480px; margin: 0 auto; }
-
-  /* 頂部資訊 */
-  .header {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-    border: 1px solid var(--border);
-  }
-  .header h1 {
-    font-size: 18px;
-    margin-bottom: 12px;
-    color: var(--primary);
-  }
-  .info-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    margin-bottom: 4px;
-  }
-  .info-row .label { color: var(--muted); }
-  .info-row .value { font-weight: bold; }
-
-  /* 預算條 */
-  .budget-bar {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-    border: 1px solid var(--border);
-    position: sticky;
-    top: 8px;
-    z-index: 10;
-  }
-  .budget-bar .title { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
-  .bar-track {
-    height: 24px;
-    background: #2a3a5c;
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-  }
-  .bar-fill {
-    height: 100%;
-    background: var(--success);
-    border-radius: 12px;
-    transition: width 0.3s ease, background 0.3s ease;
-    min-width: 0;
-  }
-  .bar-fill.warn { background: var(--warning); }
-  .bar-fill.over { background: var(--danger); }
-  .bar-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 13px;
-    font-weight: bold;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-  }
-  .budget-summary {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    margin-top: 8px;
-  }
-
-  /* 分類區塊 */
-  .section {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
-    border: 1px solid var(--border);
-  }
-  .section h2 {
-    font-size: 15px;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  /* 輔具項目 */
-  .device-item {
-    display: flex;
-    align-items: flex-start;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .device-item:last-child { border-bottom: none; }
-  .device-item.checked { background: rgba(52,152,219,0.08); margin: 0 -8px; padding: 10px 8px; border-radius: 8px; }
-  .device-cb {
-    width: 22px;
-    height: 22px;
-    border: 2px solid var(--border);
-    border-radius: 6px;
-    margin-right: 12px;
-    margin-top: 2px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-  }
-  .device-item.checked .device-cb {
-    background: var(--primary);
-    border-color: var(--primary);
-  }
-  .device-item.checked .device-cb::after {
-    content: "✓";
-    color: white;
-    font-size: 14px;
-    font-weight: bold;
-  }
-  .device-info { flex: 1; }
-  .device-name { font-size: 14px; font-weight: 600; }
-  .device-code { color: var(--muted); font-size: 12px; }
-  .device-price {
-    font-size: 14px;
-    font-weight: bold;
-    color: var(--success);
-    text-align: right;
-    white-space: nowrap;
-    margin-left: 8px;
-  }
-  .device-assess {
-    font-size: 11px;
-    color: var(--warning);
-    margin-top: 2px;
-  }
-
-  /* 個案描述 */
-  .desc-section {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-    border: 1px solid var(--border);
-  }
-  .desc-section label {
-    display: block;
-    font-size: 14px;
-    margin-bottom: 8px;
-    color: var(--muted);
-  }
-  .desc-section textarea {
-    width: 100%;
-    height: 80px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    padding: 10px;
-    font-size: 14px;
-    font-family: inherit;
-    resize: vertical;
-  }
-  .desc-section textarea::placeholder { color: #666; }
-
-  /* 送出按鈕 */
-  .submit-btn {
-    display: block;
-    width: 100%;
-    padding: 16px;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-bottom: 16px;
-    transition: opacity 0.2s;
-  }
-  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .submit-btn:not(:disabled):active { opacity: 0.8; }
-
-  /* 結果區 */
-  .result-panel {
-    display: none;
-    background: var(--card);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-    border: 2px solid var(--success);
-    text-align: center;
-  }
-  .result-panel.show { display: block; }
-  .result-code {
-    background: var(--bg);
-    border-radius: 8px;
-    padding: 12px;
-    font-family: monospace;
-    font-size: 16px;
-    margin: 12px 0;
-    word-break: break-all;
-    color: var(--success);
-    letter-spacing: 1px;
-  }
-  .discord-link {
-    display: block;
-    padding: 14px;
-    background: #5865F2;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: bold;
-    text-decoration: none;
-    margin-top: 12px;
-    cursor: pointer;
-  }
-  .discord-link:active { opacity: 0.8; }
-  .copy-toast {
-    display: none;
-    background: var(--success);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 13px;
-    margin-top: 8px;
-  }
-  .copy-toast.show { display: inline-block; }
-
-  /* footer */
-  .footer {
-    text-align: center;
-    font-size: 11px;
-    color: var(--muted);
-    padding: 16px 0;
-  }
+:root{--pri:#3498db;--ok:#27ae60;--warn:#f39c12;--err:#e74c3c;--bg:#1a1a2e;--card:#16213e;--txt:#eee;--mut:#aaa;--brd:#2a3a5c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Noto Sans TC",sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding:12px}
+.c{max-width:500px;margin:0 auto}
+.hdr{background:var(--card);border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid var(--brd)}
+.hdr h1{font-size:17px;margin-bottom:10px;color:var(--pri)}
+.ir{display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px}
+.ir .l{color:var(--mut)}.ir .v{font-weight:bold}
+.bb{background:var(--card);border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid var(--brd);position:sticky;top:6px;z-index:10}
+.bb .t{font-size:13px;color:var(--mut);margin-bottom:6px}
+.bt{height:22px;background:#2a3a5c;border-radius:11px;overflow:hidden;position:relative}
+.bf{height:100%;background:var(--ok);border-radius:11px;transition:width .3s,background .3s}
+.bf.w{background:var(--warn)}.bf.o{background:var(--err)}
+.bx{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.bs{display:flex;justify-content:space-between;font-size:12px;margin-top:6px}
+.sec{background:var(--card);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--brd)}
+.sec h2{font-size:14px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--brd);cursor:pointer;user-select:none}
+.sec h2::after{content:" ▼";font-size:10px;color:var(--mut)}
+.sec h2.collapsed::after{content:" ▶"}
+.sec .items.hidden{display:none}
+.di{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:8px}
+.di:last-child{border-bottom:none}
+.di .nm{flex:1;min-width:0}
+.di .nm .n{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.di .nm .cd{font-size:11px;color:var(--mut)}
+.di .tp{font-size:10px;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.tp.buy{background:#1a472a;color:#6fcf97}.tp.rent{background:#3b2e12;color:#f2c94c}.tp.both{background:#1a3a4a;color:#56ccf2}
+.di .pr{font-size:13px;font-weight:bold;color:var(--ok);white-space:nowrap;min-width:55px;text-align:right}
+.qty{display:flex;align-items:center;gap:0;min-width:80px}
+.qty button{width:28px;height:28px;border:1px solid var(--brd);background:var(--bg);color:var(--txt);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.qty button:first-child{border-radius:6px 0 0 6px}
+.qty button:last-child{border-radius:0 6px 6px 0}
+.qty button:active{background:var(--pri)}
+.qty .qv{width:24px;height:28px;border-top:1px solid var(--brd);border-bottom:1px solid var(--brd);background:var(--card);text-align:center;line-height:28px;font-size:13px;font-weight:bold}
+.qv.active{color:var(--pri)}
+.ds{background:var(--card);border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid var(--brd)}
+.ds label{display:block;font-size:13px;margin-bottom:6px;color:var(--mut)}
+.ds textarea{width:100%;height:70px;background:var(--bg);border:1px solid var(--brd);border-radius:8px;color:var(--txt);padding:8px;font-size:13px;font-family:inherit;resize:vertical}
+.ds textarea::placeholder{color:#555}
+.sb{display:block;width:100%;padding:14px;background:var(--pri);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:bold;cursor:pointer;margin-bottom:12px;transition:opacity .2s}
+.sb:disabled{opacity:.35;cursor:not-allowed}.sb:not(:disabled):active{opacity:.8}
+.rp{display:none;background:var(--card);border-radius:12px;padding:18px;margin-bottom:14px;border:2px solid var(--ok);text-align:center}
+.rp.show{display:block}
+.dl{display:block;padding:13px;background:#5865F2;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:bold;text-decoration:none;margin-top:10px;cursor:pointer}
+.dl:active{opacity:.8}
+.ld{display:none;text-align:center;padding:20px}.ld.show{display:block}
+.spinner{display:inline-block;width:24px;height:24px;border:3px solid var(--brd);border-top-color:var(--pri);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ft{text-align:center;font-size:10px;color:var(--mut);padding:14px 0}
 </style>
 </head>
 <body>
-<div class="container">
-
-  <!-- 頂部資訊（由計算機帶入） -->
-  <div class="header">
-    <h1>🔍 長照 2.0 輔具選配</h1>
-    <div class="info-row">
-      <span class="label">CMS 等級</span>
-      <span class="value" id="info-cms">—</span>
-    </div>
-    <div class="info-row">
-      <span class="label">收入別</span>
-      <span class="value" id="info-income">—</span>
-    </div>
-    <div class="info-row">
-      <span class="label">自付比例</span>
-      <span class="value" id="info-copay">—</span>
-    </div>
-    <div class="info-row">
-      <span class="label">B3 三年額度</span>
-      <span class="value" id="info-b3">—</span>
-    </div>
+<div class="c">
+<div class="hdr">
+  <h1>🔍 長照 2.0 輔具選配</h1>
+  <div class="ir"><span class="l">CMS 等級</span><span class="v" id="i-cms">—</span></div>
+  <div class="ir"><span class="l">收入別</span><span class="v" id="i-inc">—</span></div>
+  <div class="ir"><span class="l">自付比例</span><span class="v" id="i-cop">—</span></div>
+  <div class="ir"><span class="l">B3 三年額度</span><span class="v" id="i-b3">—</span></div>
+</div>
+<div class="bb">
+  <div class="t">💰 B3 預算使用</div>
+  <div class="bt"><div class="bf" id="bf"></div><span class="bx" id="bx">$0 / $40,000</span></div>
+  <div class="bs">
+    <span>已選 <b id="cs">0</b> 項</span>
+    <span>自付 <b id="ca">$0</b></span>
+    <span id="rt">剩餘 <b>$40,000</b></span>
   </div>
-
-  <!-- 預算條（sticky） -->
-  <div class="budget-bar">
-    <div class="title">💰 B3 預算使用</div>
-    <div class="bar-track">
-      <div class="bar-fill" id="bar-fill" style="width:0%"></div>
-      <span class="bar-text" id="bar-text">$0 / $40,000</span>
-    </div>
-    <div class="budget-summary">
-      <span>已選 <b id="count-selected">0</b> 項</span>
-      <span>自付 <b id="copay-amount">$0</b></span>
-      <span id="remaining-text">剩餘 <b>$40,000</b></span>
-    </div>
-  </div>
-
-  <!-- E 碼 — 輔具 -->
-  <div class="section" id="section-e">
-    <h2>🔧 E 碼 — 輔具購買租借</h2>
-    <div id="list-e"></div>
-  </div>
-
-  <!-- F 碼 — 居家改善 -->
-  <div class="section" id="section-f">
-    <h2>🏠 F 碼 — 居家無障礙改善</h2>
-    <div id="list-f"></div>
-  </div>
-
-  <!-- 個案描述 -->
-  <div class="desc-section">
-    <label>📝 個案狀況描述（選填，幫助精準推薦）</label>
-    <textarea id="case-desc" placeholder="例如：中風右偏癱，獨居，浴室容易滑倒，需要輪椅外出..."></textarea>
-  </div>
-
-  <!-- 送出 -->
-  <button class="submit-btn" id="submit-btn" disabled>🔍 搜尋推薦商品 → 回到 Discord</button>
-
-  <!-- 結果區 -->
-  <div class="result-panel" id="result-panel">
-    <div style="font-size:24px;margin-bottom:8px">✅</div>
-    <div style="font-size:15px;margin-bottom:8px">推薦碼已產生</div>
-    <div class="result-code" id="result-code"></div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">點擊下方按鈕回到 Discord，貼上推薦碼即可搜尋商品</div>
-    <a class="discord-link" id="discord-link">💬 回到 Discord 查看推薦</a>
-    <button class="discord-link" style="background:var(--success);margin-top:8px" id="copy-btn">📋 複製推薦碼</button>
-    <span class="copy-toast" id="copy-toast">✅ 已複製</span>
-  </div>
-
-  <div class="footer">
-    📌 資料來源：衛福部 1966.gov.tw<br>
-    輔具推薦僅供參考，實際項目請依治療師評估為準
-  </div>
+</div>
+<div id="sections"></div>
+<div class="ds">
+  <label>📝 個案狀況描述（選填，可提升查詢精準度）</label>
+  <textarea id="desc" placeholder="例如：中風右偏癱，獨居，浴室容易滑倒，需要輪椅外出..."></textarea>
+</div>
+<button class="sb" id="sbtn" disabled>🔍 查詢結果 → 回到 Discord</button>
+<div class="ld" id="loading"><div class="spinner"></div><div style="margin-top:8px;font-size:13px">正在送出查詢...</div></div>
+<div class="rp" id="rp">
+  <div style="font-size:22px;margin-bottom:6px">✅</div>
+  <div style="font-size:14px">查詢已送出，請回到 Discord 查看結果</div>
+  <a class="dl" id="dlink">💬 回到 Discord 查看結果</a>
+</div>
+<div class="ft">📌 資料來源：衛福部 1966.gov.tw ｜ 購買組數=補助購買個數，租賃組數=補助租賃月份數<br>輔具查詢僅供參考，實際項目請依治療師評估為準</div>
 </div>
 
 <script>
-// === 輔具資料 ===
-const E_CODES = [
-  { code: "EA01-1", name: "輪椅（普通型）", price: 10000, unit: "台", assess: true, nb: "mobility" },
-  { code: "EA01-2", name: "輪椅（特製型）", price: 20000, unit: "台", assess: true, nb: "mobility" },
-  { code: "EA02",   name: "電動輪椅",       price: 30000, unit: "台", assess: true, nb: "mobility" },
-  { code: "EA03",   name: "助行器",         price: 3000,  unit: "台", assess: false, nb: "mobility" },
-  { code: "EA04",   name: "氣墊床",         price: 12000, unit: "張", assess: true, nb: "transfer" },
-  { code: "EA05",   name: "移位機（電動）",  price: 40000, unit: "台", assess: true, nb: "transfer" },
-  { code: "EA06",   name: "移位腰帶",       price: 2000,  unit: "條", assess: false, nb: "transfer" },
-  { code: "EB01",   name: "洗澡椅",         price: 4000,  unit: "張", assess: false, nb: "bathroom" },
-  { code: "EB02",   name: "馬桶椅（如廁輔具）", price: 3500, unit: "台", assess: false, nb: "bathroom" },
-  { code: "EB03",   name: "防跌輔具組",     price: 5000,  unit: "組", assess: false, nb: "bathroom" },
-  { code: "EC01",   name: "語言溝通輔具",   price: 15000, unit: "台", assess: true, nb: "bathroom" },
-  { code: "EC02",   name: "視覺輔具",       price: 10000, unit: "組", assess: true, nb: "bathroom" },
+const CATS=[
+{id:"EA",name:"🚿 如廁及沐浴輔具",nb:"bathroom",items:[
+{c:"EA01-1",n:"馬桶增高器",p:1200,t:"buy"},{c:"EA01-2",n:"便盆椅",p:1200,t:"buy"},{c:"EA01-3",n:"沐浴椅",p:1200,t:"buy"}]},
+{id:"EB",name:"🚶 行動輔具",nb:"mobility",items:[
+{c:"EB01",n:"單支枴杖-不銹鋼製",p:1000,t:"buy"},{c:"EB02",n:"單支枴杖-鋁製",p:500,t:"buy"},
+{c:"EB03",n:"助行器",p:800,t:"buy"},{c:"EB04",n:"帶輪型助步車(助行椅)",p:3000,t:"both",rp:300}]},
+{id:"EC",name:"♿ 輪椅及配件",nb:"mobility",items:[
+{c:"EC01",n:"輪椅-A款(非輕量化量產型)",p:3500,t:"buy"},{c:"EC02",n:"輪椅-B款(輕量化量產型)",p:4000,t:"both",rp:450},
+{c:"EC03",n:"輪椅-C款(量身訂製型)",p:9000,t:"buy"},
+{c:"EC04",n:"輪椅附加功能-A款(利於移位)",p:5000,t:"both",rp:150},{c:"EC05",n:"輪椅附加功能-B款(仰躺)",p:2000,t:"both",rp:150},
+{c:"EC06",n:"輪椅附加功能-C款(空中傾倒)",p:4000,t:"both",rp:150},
+{c:"EC07",n:"擺位系統-A款(平面型背靠)",p:1000,t:"buy"},{c:"EC08",n:"擺位系統-B款(曲面適形背靠)",p:6000,t:"buy"},
+{c:"EC09",n:"擺位系統-C款(軀幹側支撐架)",p:3000,t:"buy"},{c:"EC10",n:"擺位系統-D款(頭靠系統)",p:2500,t:"buy"},
+{c:"EC11",n:"電動輪椅",p:2500,t:"rent",rp:2500},{c:"EC12",n:"電動代步車",p:1200,t:"rent",rp:1200}]},
+{id:"ED",name:"🏋️ 移位輔具",nb:"transfer",items:[
+{c:"ED01",n:"移位腰帶",p:1500,t:"buy"},{c:"ED02",n:"移位板",p:2000,t:"buy"},{c:"ED03",n:"人力移位吊帶",p:4000,t:"buy"},
+{c:"ED04",n:"移位滑墊-A款",p:3000,t:"buy"},{c:"ED05",n:"移位滑墊-B款",p:8000,t:"buy"},
+{c:"ED06",n:"移位轉盤",p:2000,t:"buy"},{c:"ED07",n:"移位機",p:40000,t:"both",rp:2000},{c:"ED08",n:"移位機吊帶",p:6000,t:"buy"}]},
+{id:"EE",name:"📢 溝通及訊號輔具",nb:"bathroom",items:[
+{c:"EE01",n:"電話擴音器",p:2000,t:"buy"},{c:"EE02",n:"電話閃光震動器",p:2000,t:"buy"},
+{c:"EE03",n:"火警閃光警示器",p:2000,t:"buy"},{c:"EE04",n:"門鈴閃光器",p:2000,t:"buy"},{c:"EE05",n:"無線震動警示器",p:2000,t:"buy"}]},
+{id:"EF",name:"🏠 生活輔具",nb:"mobility",items:[
+{c:"EF01",n:"衣著用輔具",p:500,t:"buy"},{c:"EF02",n:"居家用生活輔具",p:500,t:"buy"},{c:"EF03",n:"飲食用輔具",p:500,t:"buy"}]},
+{id:"EG",name:"🛏️ 壓瘡預防輔具",nb:"transfer",items:[
+{c:"EG01",n:"氣墊床-A款",p:8000,t:"both",rp:300},{c:"EG02",n:"氣墊床-B款",p:12000,t:"both",rp:500},
+{c:"EG03",n:"輪椅座墊-A款(塑膠氣囊)",p:5000,t:"buy"},{c:"EG04",n:"輪椅座墊-B款(橡膠氣囊)",p:10000,t:"buy"},
+{c:"EG05",n:"輪椅座墊-C款(液態凝膠)",p:10000,t:"buy"},{c:"EG06",n:"輪椅座墊-D款(固態凝膠)",p:8000,t:"buy"},
+{c:"EG07",n:"輪椅座墊-E款(填充氣囊)",p:8000,t:"buy"},{c:"EG08",n:"輪椅座墊-F款(交替充氣)",p:5000,t:"buy"},
+{c:"EG09",n:"輪椅座墊-G款(量製型)",p:10000,t:"buy"}]},
+{id:"EH",name:"🛌 居家照顧床及爬梯機",nb:"transfer",items:[
+{c:"EH01",n:"居家用照顧床",p:8000,t:"both",rp:1000},{c:"EH02",n:"照顧床附加-A款(床面升降)",p:5000,t:"both",rp:200},
+{c:"EH03",n:"照顧床附加-B款(電動升降)",p:5000,t:"both",rp:500},
+{c:"EH04",n:"爬梯機(單趟)",p:700,t:"rent",rp:700},{c:"EH05",n:"爬梯機(月)",p:4000,t:"rent",rp:4000}]},
+{id:"FA",name:"🏗️ 居家無障礙設施",nb:"bathroom",items:[
+{c:"FA01",n:"扶手",p:150,t:"buy"},{c:"FA02",n:"可動式扶手",p:3600,t:"buy"},
+{c:"FA03",n:"非固定式斜坡板A款",p:3500,t:"buy"},{c:"FA04",n:"非固定式斜坡板B款",p:5000,t:"buy"},
+{c:"FA05",n:"非固定式斜坡板C款",p:10000,t:"buy"},{c:"FA06",n:"固定式斜坡道",p:10000,t:"buy"},
+{c:"FA07",n:"架高式和式地板拆除",p:5000,t:"buy"},{c:"FA08",n:"反光貼條或消光",p:3000,t:"buy"},
+{c:"FA09",n:"隔間",p:600,t:"buy"},{c:"FA10",n:"防滑措施",p:3000,t:"buy"},
+{c:"FA11",n:"門A款",p:7000,t:"buy"},{c:"FA12",n:"門B款",p:10000,t:"buy"},
+{c:"FA13",n:"水龍頭",p:3000,t:"buy"},{c:"FA14",n:"改善浴缸",p:7000,t:"buy"},
+{c:"FA15",n:"改善洗臉台",p:3000,t:"buy"},{c:"FA16",n:"改善馬桶",p:5000,t:"buy"},
+{c:"FA17",n:"壁掛式淋浴椅(床)",p:5000,t:"buy"},{c:"FA18",n:"改善流理台",p:15000,t:"buy"},
+{c:"FA19",n:"改善抽油煙機",p:1000,t:"buy"},{c:"FA20",n:"特殊簡易洗槽",p:2000,t:"buy"},
+{c:"FA21",n:"特殊簡易浴槽",p:5000,t:"buy"}]},
+{id:"FA2",name:"🔨 居家無障礙修繕/設備(新制)",nb:"bathroom",items:[
+{c:"FA22",n:"固定式扶手(每10cm)",p:160,t:"buy"},{c:"FA23",n:"可動式扶手(單支)",p:3600,t:"buy"},
+{c:"FA24",n:"床邊扶手(單處)",p:1000,t:"buy"},{c:"FA25",n:"門檻斜角(單側)",p:1000,t:"buy"},
+{c:"FA26",n:"非固定式斜坡板A款",p:3500,t:"buy"},{c:"FA27",n:"非固定式斜坡板B款",p:5000,t:"buy"},
+{c:"FA28",n:"非固定式斜坡板C款",p:7000,t:"buy"},{c:"FA29",n:"非固定式斜坡板D款",p:10000,t:"buy"},
+{c:"FA30",n:"改善高低差(10cm以下)",p:3500,t:"buy"},{c:"FA31",n:"改善高低差(20cm以下)",p:5000,t:"buy"},
+{c:"FA32",n:"改善高低差(30cm以下)",p:7000,t:"buy"},{c:"FA33",n:"改善高低差(超過30cm)",p:10000,t:"buy"},
+{c:"FA34",n:"防滑地磚(單處)",p:6000,t:"buy"},{c:"FA35",n:"防滑措施",p:2000,t:"buy"},
+{c:"FA36",n:"隔間(每m²)",p:800,t:"buy"},{c:"FA37",n:"門簡易型(單處)",p:7000,t:"buy"},
+{c:"FA38",n:"門進階型(單處)",p:10000,t:"buy"},{c:"FA39",n:"截水槽(單處)",p:6000,t:"buy"},
+{c:"FA40",n:"改善浴缸(單處)",p:7000,t:"buy"},{c:"FA41",n:"改善馬桶(單處)",p:5000,t:"buy"},
+{c:"FA42",n:"馬桶背靠(單處)",p:2000,t:"buy"},{c:"FA43",n:"移動式清洗槽-局部型",p:2000,t:"buy"},
+{c:"FA44",n:"移動式清洗槽-全身型",p:5000,t:"buy"}]}
 ];
 
-const F_CODES = [
-  { code: "FA01", name: "安裝扶手",             price: 0, rule: "每處約 1,500~5,000 元", unit: "處", assess: true, nb: "bathroom" },
-  { code: "FA02", name: "設置斜坡道",           price: 0, rule: "每公尺約 3,000 元",     unit: "式", assess: true, nb: "bathroom" },
-  { code: "FA03", name: "門檻平整化",           price: 0, rule: "每處約 2,000~5,000 元", unit: "處", assess: true, nb: "bathroom" },
-  { code: "FA04", name: "地板防滑處理",         price: 0, rule: "每m²約 150 元",          unit: "m²", assess: true, nb: "bathroom" },
-  { code: "FA05", name: "浴室改善（安全設施）",  price: 0, rule: "約 5,000~20,000 元",    unit: "式", assess: true, nb: "bathroom" },
-  { code: "FA06", name: "廚房改善（操作台降低）",price: 0, rule: "約 10,000~25,000 元",   unit: "式", assess: true, nb: "bathroom" },
-  { code: "FA07", name: "電燈開關調整",         price: 0, rule: "每處約 1,000~2,000 元", unit: "處", assess: true, nb: "bathroom" },
-  { code: "FA08", name: "門寬拓寬",             price: 0, rule: "單一門約 15,000~40,000 元", unit: "處", assess: true, nb: "bathroom" },
-  { code: "FA09", name: "床鋪高度調整",         price: 5000, rule: null, unit: "張", assess: true, nb: "transfer" },
-];
+const state={};// code -> qty
+let P={};
 
-// === 狀態 ===
-const selected = new Set();
-let params = {};
-
-// === URL 參數解析 ===
-function parseParams() {
-  const p = new URLSearchParams(window.location.search);
-  params = {
-    cms: parseInt(p.get("cms")) || 5,
-    income: p.get("income") || "general",
-    b3_limit: parseInt(p.get("b3")) || 40000,
-    copay_rate: parseFloat(p.get("copay")) || 0.3,
-    guild: p.get("guild") || "",
-    channel: p.get("channel") || "",
-  };
-
-  const incomeMap = { low: "低收入戶", mid_low: "中低收入戶", general: "一般戶" };
-  document.getElementById("info-cms").textContent = `第 ${params.cms} 級`;
-  document.getElementById("info-income").textContent = incomeMap[params.income] || params.income;
-  document.getElementById("info-copay").textContent = `${(params.copay_rate * 100).toFixed(0)}%`;
-  document.getElementById("info-b3").textContent = `$${params.b3_limit.toLocaleString()}`;
+function parseParams(){
+  const u=new URLSearchParams(location.search);
+  P={cms:+(u.get("cms"))||5,income:u.get("income")||"general",b3:+(u.get("b3"))||40000,
+     copay:+(u.get("copay"))||.3,guild:u.get("guild")||"",channel:u.get("channel")||"",
+     webhook:u.get("wh")||""};
+  const im={low:"低收入戶",mid_low:"中低收入戶",general:"一般戶"};
+  document.getElementById("i-cms").textContent="第 "+P.cms+" 級";
+  document.getElementById("i-inc").textContent=im[P.income]||P.income;
+  document.getElementById("i-cop").textContent=(P.copay*100).toFixed(0)+"%";
+  document.getElementById("i-b3").textContent="$"+P.b3.toLocaleString();
 }
 
-// === 渲染列表 ===
-function renderList(containerId, items) {
-  const el = document.getElementById(containerId);
-  items.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "device-item";
-    div.dataset.code = item.code;
-    div.dataset.price = item.price;
-    const priceStr = item.price > 0
-      ? `$${item.price.toLocaleString()}`
-      : (item.rule || "依評估");
-    div.innerHTML = `
-      <div class="device-cb"></div>
-      <div class="device-info">
-        <div class="device-name">${item.name}</div>
-        <div class="device-code">${item.code}${item.assess ? ' · 📋需評估' : ''}</div>
-      </div>
-      <div class="device-price">${priceStr}</div>
-    `;
-    div.addEventListener("click", () => toggleItem(div, item));
-    el.appendChild(div);
+function render(){
+  const root=document.getElementById("sections");
+  CATS.forEach(cat=>{
+    const sec=document.createElement("div");sec.className="sec";
+    const h2=document.createElement("h2");h2.textContent=cat.name+" ("+cat.items.length+")";
+    const items=document.createElement("div");items.className="items";
+    // 預設收合 FA 和 FA2
+    if(cat.id==="FA"||cat.id==="FA2"||cat.id==="EE"||cat.id==="EF"){h2.classList.add("collapsed");items.classList.add("hidden")}
+    h2.onclick=()=>{h2.classList.toggle("collapsed");items.classList.toggle("hidden")};
+    sec.appendChild(h2);
+    cat.items.forEach(it=>{
+      const d=document.createElement("div");d.className="di";
+      const tl={buy:"購置",rent:"租賃",both:"購/租"};
+      const tc={buy:"buy",rent:"rent",both:"both"};
+      d.innerHTML=`
+        <div class="nm"><div class="n">${it.n}</div><div class="cd">${it.c} <span class="tp ${tc[it.t]}">${tl[it.t]}</span></div></div>
+        <div class="pr">$${it.p.toLocaleString()}</div>
+        <div class="qty">
+          <button data-code="${it.c}" data-d="-1">−</button>
+          <div class="qv" id="q-${it.c}">0</div>
+          <button data-code="${it.c}" data-d="1">+</button>
+        </div>`;
+      d.querySelectorAll("button").forEach(b=>b.addEventListener("click",e=>{
+        e.stopPropagation();
+        const code=b.dataset.code,dir=+b.dataset.d;
+        const cur=state[code]||0;
+        const nv=Math.max(0,Math.min(99,cur+dir));
+        if(nv===0)delete state[code];else state[code]=nv;
+        const qv=document.getElementById("q-"+code);
+        qv.textContent=nv;qv.classList.toggle("active",nv>0);
+        d.style.background=nv>0?"rgba(52,152,219,.06)":"";
+        updateBudget();
+      }));
+      items.appendChild(d);
+    });
+    sec.appendChild(items);root.appendChild(sec);
   });
 }
 
-// === 勾選切換 ===
-function toggleItem(div, item) {
-  const code = item.code;
-  if (selected.has(code)) {
-    selected.delete(code);
-    div.classList.remove("checked");
-  } else {
-    selected.add(code);
-    div.classList.add("checked");
+function getAllItems(){const m={};CATS.forEach(c=>c.items.forEach(i=>m[i.c]=i));return m}
+const allItems=getAllItems?null:null;// lazy
+function getItem(code){for(const c of CATS)for(const i of c.items)if(i.c===code)return i;return null}
+
+function updateBudget(){
+  let total=0,count=0;
+  for(const[code,qty]of Object.entries(state)){
+    const it=getItem(code);if(it)total+=it.p*qty;count+=qty;
   }
-  updateBudget();
+  const lim=P.b3,pct=Math.min(total/lim*100,100),rem=lim-total,cop=Math.round(total*P.copay);
+  const bf=document.getElementById("bf");
+  bf.style.width=pct+"%";bf.className="bf"+(pct>90?" o":pct>70?" w":"");
+  document.getElementById("bx").textContent="$"+total.toLocaleString()+" / $"+lim.toLocaleString();
+  document.getElementById("cs").textContent=count;
+  document.getElementById("ca").textContent="$"+cop.toLocaleString();
+  document.getElementById("rt").innerHTML=rem>=0
+    ?"剩餘 <b>$"+rem.toLocaleString()+"</b>"
+    :"<b style='color:var(--err)'>超額 $"+(-rem).toLocaleString()+"</b>";
+  document.getElementById("sbtn").disabled=count===0;
 }
 
-// === 更新預算 ===
-function updateBudget() {
-  let total = 0;
-  selected.forEach(code => {
-    const item = [...E_CODES, ...F_CODES].find(i => i.code === code);
-    if (item) total += item.price;
-  });
-  const limit = params.b3_limit;
-  const pct = Math.min((total / limit) * 100, 100);
-  const remaining = limit - total;
-  const copay = Math.round(total * params.copay_rate);
-
-  const fill = document.getElementById("bar-fill");
-  fill.style.width = pct + "%";
-  fill.className = "bar-fill" + (pct > 90 ? " over" : pct > 70 ? " warn" : "");
-
-  document.getElementById("bar-text").textContent =
-    `$${total.toLocaleString()} / $${limit.toLocaleString()}`;
-  document.getElementById("count-selected").textContent = selected.size;
-  document.getElementById("copay-amount").textContent = `$${copay.toLocaleString()}`;
-  document.getElementById("remaining-text").innerHTML =
-    remaining >= 0
-      ? `剩餘 <b>$${remaining.toLocaleString()}</b>`
-      : `<b style="color:var(--danger)">超額 $${(-remaining).toLocaleString()}</b>`;
-
-  document.getElementById("submit-btn").disabled = selected.size === 0;
-}
-
-// === 產生推薦碼 ===
-function generateCode() {
-  // 格式: R-{cms}{income}-{codes}-{desc_short}
-  const incomeCode = { low: "L", mid_low: "M", general: "G" };
-  const codes = [...selected].sort().join(".");
-  const desc = document.getElementById("case-desc").value.trim();
-  const descPart = desc ? "-" + encodeURIComponent(desc.substring(0, 50)) : "";
-  return `R-${params.cms}${incomeCode[params.income] || "G"}-${codes}${descPart}`;
-}
-
-// === 送出 ===
-document.getElementById("submit-btn").addEventListener("click", function() {
-  const code = generateCode();
-  document.getElementById("result-code").textContent = code;
-
-  // Discord deep link
-  const guildId = params.guild;
-  const channelId = params.channel;
-  if (guildId && channelId) {
-    document.getElementById("discord-link").href =
-      `discord:///channels/${guildId}/${channelId}`;
+function buildPayload(){
+  const codes=Object.entries(state).filter(([,q])=>q>0).map(([c,q])=>c+":"+q);
+  const incMap={low:"L",mid_low:"M",general:"G"};
+  const desc=document.getElementById("desc").value.trim();
+  // 推薦碼
+  const rc="R-"+P.cms+(incMap[P.income]||"G")+"-"+codes.join(".")+
+    (desc?"-"+encodeURIComponent(desc.substring(0,80)):"");
+  // 人類可讀摘要
+  let summary="**輔具查詢** — CMS "+P.cms+" 級\n";
+  for(const[code,qty] of Object.entries(state)){
+    if(qty<=0)continue;
+    const it=getItem(code);
+    summary+="`"+code+"` "+it.n+" ×"+qty+" ($"+(it.p*qty).toLocaleString()+")\n";
   }
+  if(desc)summary+="\n📝 "+desc;
+  return{code:rc,summary:summary};
+}
 
-  // 自動複製
-  navigator.clipboard.writeText(code).catch(() => {});
-
-  document.getElementById("result-panel").classList.add("show");
-  this.style.display = "none";
-
-  // 滾到結果
-  document.getElementById("result-panel").scrollIntoView({ behavior: "smooth" });
+document.getElementById("sbtn").addEventListener("click",async function(){
+  this.style.display="none";
+  document.getElementById("loading").classList.add("show");
+  const{code,summary}=buildPayload();
+  const whUrl=P.webhook;
+  let ok=false;
+  if(whUrl){
+    try{
+      const resp=await fetch(whUrl,{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({content:code+"\n"+summary,username:"輔具選配",avatar_url:""})});
+      ok=resp.ok;
+    }catch(e){console.error(e)}
+  }
+  document.getElementById("loading").classList.remove("show");
+  const rp=document.getElementById("rp");rp.classList.add("show");
+  if(!ok)rp.querySelector("div:nth-child(2)").textContent="⚠️ 自動送出失敗，請複製推薦碼貼回 Discord";
+  if(P.guild&&P.channel){
+    document.getElementById("dlink").href="https://discord.com/channels/"+P.guild+"/"+P.channel;
+  }
+  rp.scrollIntoView({behavior:"smooth"});
 });
 
-// 複製按鈕
-document.getElementById("copy-btn").addEventListener("click", function() {
-  const code = document.getElementById("result-code").textContent;
-  navigator.clipboard.writeText(code).then(() => {
-    const toast = document.getElementById("copy-toast");
-    toast.classList.add("show");
-    setTimeout(() => toast.classList.remove("show"), 2000);
-  });
-});
-
-// === 初始化 ===
-parseParams();
-renderList("list-e", E_CODES);
-renderList("list-f", F_CODES);
-updateBudget();
+parseParams();render();updateBudget();
 </script>
 </body>
 </html>
