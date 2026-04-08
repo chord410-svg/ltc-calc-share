@@ -224,9 +224,9 @@ function buildPayload(){
   const codes=Object.entries(state).filter(([,q])=>q>0).map(([c,q])=>c+":"+q);
   const incMap={low:"L",mid_low:"M",general:"G"};
   const desc=document.getElementById("desc").value.trim();
-  // 推薦碼
+  // 推薦碼（用 ~ 分隔描述，避免與 EA01-1 的 - 衝突）
   const rc="R-"+P.cms+(incMap[P.income]||"G")+"-"+codes.join(".")+
-    (desc?"-"+encodeURIComponent(desc.substring(0,80)):"");
+    (desc?"~"+encodeURIComponent(desc.substring(0,80)):"");
   // 人類可讀摘要
   let summary="**輔具查詢** — CMS "+P.cms+" 級\n";
   for(const[code,qty] of Object.entries(state)){
