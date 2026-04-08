@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>長照 2.0 輔具選配</title>
+<style>
+  :root {
+    --primary: #3498db;
+    --success: #27ae60;
+    --warning: #f39c12;
+    --danger: #e74c3c;
+    --bg: #1a1a2e;
+    --card: #16213e;
+    --text: #eee;
+    --muted: #aaa;
+    --border: #2a3a5c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Noto Sans TC", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 16px;
+  }
+  .container { max-width: 480px; margin: 0 auto; }
+
+  /* 頂部資訊 */
+  .header {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .header h1 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: var(--primary);
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+  .info-row .label { color: var(--muted); }
+  .info-row .value { font-weight: bold; }
+
+  /* 預算條 */
+  .budget-bar {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    position: sticky;
+    top: 8px;
+    z-index: 10;
+  }
+  .budget-bar .title { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+  .bar-track {
+    height: 24px;
+    background: #2a3a5c;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    background: var(--success);
+    border-radius: 12px;
+    transition: width 0.3s ease, background 0.3s ease;
+    min-width: 0;
+  }
+  .bar-fill.warn { background: var(--warning); }
+  .bar-fill.over { background: var(--danger); }
+  .bar-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 13px;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+  .budget-summary {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+
+  /* 分類區塊 */
+  .section {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+  .section h2 {
+    font-size: 15px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* 輔具項目 */
+  .device-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .device-item:last-child { border-bottom: none; }
+  .device-item.checked { background: rgba(52,152,219,0.08); margin: 0 -8px; padding: 10px 8px; border-radius: 8px; }
+  .device-cb {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    margin-right: 12px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .device-item.checked .device-cb {
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+  .device-item.checked .device-cb::after {
+    content: "✓";
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .device-info { flex: 1; }
+  .device-name { font-size: 14px; font-weight: 600; }
+  .device-code { color: var(--muted); font-size: 12px; }
+  .device-price {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--success);
+    text-align: right;
+    white-space: nowrap;
+    margin-left: 8px;
+  }
+  .device-assess {
+    font-size: 11px;
+    color: var(--warning);
+    margin-top: 2px;
+  }
+
+  /* 個案描述 */
+  .desc-section {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .desc-section label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: var(--muted);
+  }
+  .desc-section textarea {
+    width: 100%;
+    height: 80px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .desc-section textarea::placeholder { color: #666; }
+
+  /* 送出按鈕 */
+  .submit-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: opacity 0.2s;
+  }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .submit-btn:not(:disabled):active { opacity: 0.8; }
+
+  /* 結果區 */
+  .result-panel {
+    display: none;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 2px solid var(--success);
+    text-align: center;
+  }
+  .result-panel.show { display: block; }
+  .result-code {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: monospace;
+    font-size: 16px;
+    margin: 12px 0;
+    word-break: break-all;
+    color: var(--success);
+    letter-spacing: 1px;
+  }
+  .discord-link {
+    display: block;
+    padding: 14px;
+    background: #5865F2;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    text-decoration: none;
+    margin-top: 12px;
+    cursor: pointer;
+  }
+  .discord-link:active { opacity: 0.8; }
+  .copy-toast {
+    display: none;
+    background: var(--success);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .copy-toast.show { display: inline-block; }
+
+  /* footer */
+  .footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 16px 0;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 頂部資訊（由計算機帶入） -->
+  <div class="header">
+    <h1>🔍 長照 2.0 輔具選配</h1>
+    <div class="info-row">
+      <span class="label">CMS 等級</span>
+      <span class="value" id="info-cms">—</span>
+    </div>
+    <div class="info-row">
+      <span class="label">收入別</span>
+      <span class="value" id="info-income">—</span>
+    </div>
+    <div class="info-row">
+      <span class="label">自付比例</span>
+      <span class="value" id="info-copay">—</span>
+    </div>
+    <div class="info-row">
+      <span class="label">B3 三年額度</span>
+      <span class="value" id="info-b3">—</span>
+    </div>
+  </div>
+
+  <!-- 預算條（sticky） -->
+  <div class="budget-bar">
+    <div class="title">💰 B3 預算使用</div>
+    <div class="bar-track">
+      <div class="bar-fill" id="bar-fill" style="width:0%"></div>
+      <span class="bar-text" id="bar-text">$0 / $40,000</span>
+    </div>
+    <div class="budget-summary">
+      <span>已選 <b id="count-selected">0</b> 項</span>
+      <span>自付 <b id="copay-amount">$0</b></span>
+      <span id="remaining-text">剩餘 <b>$40,000</b></span>
+    </div>
+  </div>
+
+  <!-- E 碼 — 輔具 -->
+  <div class="section" id="section-e">
+    <h2>🔧 E 碼 — 輔具購買租借</h2>
+    <div id="list-e"></div>
+  </div>
+
+  <!-- F 碼 — 居家改善 -->
+  <div class="section" id="section-f">
+    <h2>🏠 F 碼 — 居家無障礙改善</h2>
+    <div id="list-f"></div>
+  </div>
+
+  <!-- 個案描述 -->
+  <div class="desc-section">
+    <label>📝 個案狀況描述（選填，幫助精準推薦）</label>
+    <textarea id="case-desc" placeholder="例如：中風右偏癱，獨居，浴室容易滑倒，需要輪椅外出..."></textarea>
+  </div>
+
+  <!-- 送出 -->
+  <button class="submit-btn" id="submit-btn" disabled>🔍 搜尋推薦商品 → 回到 Discord</button>
+
+  <!-- 結果區 -->
+  <div class="result-panel" id="result-panel">
+    <div style="font-size:24px;margin-bottom:8px">✅</div>
+    <div style="font-size:15px;margin-bottom:8px">推薦碼已產生</div>
+    <div class="result-code" id="result-code"></div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">點擊下方按鈕回到 Discord，貼上推薦碼即可搜尋商品</div>
+    <a class="discord-link" id="discord-link">💬 回到 Discord 查看推薦</a>
+    <button class="discord-link" style="background:var(--success);margin-top:8px" id="copy-btn">📋 複製推薦碼</button>
+    <span class="copy-toast" id="copy-toast">✅ 已複製</span>
+  </div>
+
+  <div class="footer">
+    📌 資料來源：衛福部 1966.gov.tw<br>
+    輔具推薦僅供參考，實際項目請依治療師評估為準
+  </div>
+</div>
+
+<script>
+// === 輔具資料 ===
+const E_CODES = [
+  { code: "EA01-1", name: "輪椅（普通型）", price: 10000, unit: "台", assess: true, nb: "mobility" },
+  { code: "EA01-2", name: "輪椅（特製型）", price: 20000, unit: "台", assess: true, nb: "mobility" },
+  { code: "EA02",   name: "電動輪椅",       price: 30000, unit: "台", assess: true, nb: "mobility" },
+  { code: "EA03",   name: "助行器",         price: 3000,  unit: "台", assess: false, nb: "mobility" },
+  { code: "EA04",   name: "氣墊床",         price: 12000, unit: "張", assess: true, nb: "transfer" },
+  { code: "EA05",   name: "移位機（電動）",  price: 40000, unit: "台", assess: true, nb: "transfer" },
+  { code: "EA06",   name: "移位腰帶",       price: 2000,  unit: "條", assess: false, nb: "transfer" },
+  { code: "EB01",   name: "洗澡椅",         price: 4000,  unit: "張", assess: false, nb: "bathroom" },
+  { code: "EB02",   name: "馬桶椅（如廁輔具）", price: 3500, unit: "台", assess: false, nb: "bathroom" },
+  { code: "EB03",   name: "防跌輔具組",     price: 5000,  unit: "組", assess: false, nb: "bathroom" },
+  { code: "EC01",   name: "語言溝通輔具",   price: 15000, unit: "台", assess: true, nb: "bathroom" },
+  { code: "EC02",   name: "視覺輔具",       price: 10000, unit: "組", assess: true, nb: "bathroom" },
+];
+
+const F_CODES = [
+  { code: "FA01", name: "安裝扶手",             price: 0, rule: "每處約 1,500~5,000 元", unit: "處", assess: true, nb: "bathroom" },
+  { code: "FA02", name: "設置斜坡道",           price: 0, rule: "每公尺約 3,000 元",     unit: "式", assess: true, nb: "bathroom" },
+  { code: "FA03", name: "門檻平整化",           price: 0, rule: "每處約 2,000~5,000 元", unit: "處", assess: true, nb: "bathroom" },
+  { code: "FA04", name: "地板防滑處理",         price: 0, rule: "每m²約 150 元",          unit: "m²", assess: true, nb: "bathroom" },
+  { code: "FA05", name: "浴室改善（安全設施）",  price: 0, rule: "約 5,000~20,000 元",    unit: "式", assess: true, nb: "bathroom" },
+  { code: "FA06", name: "廚房改善（操作台降低）",price: 0, rule: "約 10,000~25,000 元",   unit: "式", assess: true, nb: "bathroom" },
+  { code: "FA07", name: "電燈開關調整",         price: 0, rule: "每處約 1,000~2,000 元", unit: "處", assess: true, nb: "bathroom" },
+  { code: "FA08", name: "門寬拓寬",             price: 0, rule: "單一門約 15,000~40,000 元", unit: "處", assess: true, nb: "bathroom" },
+  { code: "FA09", name: "床鋪高度調整",         price: 5000, rule: null, unit: "張", assess: true, nb: "transfer" },
+];
+
+// === 狀態 ===
+const selected = new Set();
+let params = {};
+
+// === URL 參數解析 ===
+function parseParams() {
+  const p = new URLSearchParams(window.location.search);
+  params = {
+    cms: parseInt(p.get("cms")) || 5,
+    income: p.get("income") || "general",
+    b3_limit: parseInt(p.get("b3")) || 40000,
+    copay_rate: parseFloat(p.get("copay")) || 0.3,
+    guild: p.get("guild") || "",
+    channel: p.get("channel") || "",
+  };
+
+  const incomeMap = { low: "低收入戶", mid_low: "中低收入戶", general: "一般戶" };
+  document.getElementById("info-cms").textContent = `第 ${params.cms} 級`;
+  document.getElementById("info-income").textContent = incomeMap[params.income] || params.income;
+  document.getElementById("info-copay").textContent = `${(params.copay_rate * 100).toFixed(0)}%`;
+  document.getElementById("info-b3").textContent = `$${params.b3_limit.toLocaleString()}`;
+}
+
+// === 渲染列表 ===
+function renderList(containerId, items) {
+  const el = document.getElementById(containerId);
+  items.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "device-item";
+    div.dataset.code = item.code;
+    div.dataset.price = item.price;
+    const priceStr = item.price > 0
+      ? `$${item.price.toLocaleString()}`
+      : (item.rule || "依評估");
+    div.innerHTML = `
+      <div class="device-cb"></div>
+      <div class="device-info">
+        <div class="device-name">${item.name}</div>
+        <div class="device-code">${item.code}${item.assess ? ' · 📋需評估' : ''}</div>
+      </div>
+      <div class="device-price">${priceStr}</div>
+    `;
+    div.addEventListener("click", () => toggleItem(div, item));
+    el.appendChild(div);
+  });
+}
+
+// === 勾選切換 ===
+function toggleItem(div, item) {
+  const code = item.code;
+  if (selected.has(code)) {
+    selected.delete(code);
+    div.classList.remove("checked");
+  } else {
+    selected.add(code);
+    div.classList.add("checked");
+  }
+  updateBudget();
+}
+
+// === 更新預算 ===
+function updateBudget() {
+  let total = 0;
+  selected.forEach(code => {
+    const item = [...E_CODES, ...F_CODES].find(i => i.code === code);
+    if (item) total += item.price;
+  });
+  const limit = params.b3_limit;
+  const pct = Math.min((total / limit) * 100, 100);
+  const remaining = limit - total;
+  const copay = Math.round(total * params.copay_rate);
+
+  const fill = document.getElementById("bar-fill");
+  fill.style.width = pct + "%";
+  fill.className = "bar-fill" + (pct > 90 ? " over" : pct > 70 ? " warn" : "");
+
+  document.getElementById("bar-text").textContent =
+    `$${total.toLocaleString()} / $${limit.toLocaleString()}`;
+  document.getElementById("count-selected").textContent = selected.size;
+  document.getElementById("copay-amount").textContent = `$${copay.toLocaleString()}`;
+  document.getElementById("remaining-text").innerHTML =
+    remaining >= 0
+      ? `剩餘 <b>$${remaining.toLocaleString()}</b>`
+      : `<b style="color:var(--danger)">超額 $${(-remaining).toLocaleString()}</b>`;
+
+  document.getElementById("submit-btn").disabled = selected.size === 0;
+}
+
+// === 產生推薦碼 ===
+function generateCode() {
+  // 格式: R-{cms}{income}-{codes}-{desc_short}
+  const incomeCode = { low: "L", mid_low: "M", general: "G" };
+  const codes = [...selected].sort().join(".");
+  const desc = document.getElementById("case-desc").value.trim();
+  const descPart = desc ? "-" + encodeURIComponent(desc.substring(0, 50)) : "";
+  return `R-${params.cms}${incomeCode[params.income] || "G"}-${codes}${descPart}`;
+}
+
+// === 送出 ===
+document.getElementById("submit-btn").addEventListener("click", function() {
+  const code = generateCode();
+  document.getElementById("result-code").textContent = code;
+
+  // Discord deep link
+  const guildId = params.guild;
+  const channelId = params.channel;
+  if (guildId && channelId) {
+    document.getElementById("discord-link").href =
+      `discord:///channels/${guildId}/${channelId}`;
+  }
+
+  // 自動複製
+  navigator.clipboard.writeText(code).catch(() => {});
+
+  document.getElementById("result-panel").classList.add("show");
+  this.style.display = "none";
+
+  // 滾到結果
+  document.getElementById("result-panel").scrollIntoView({ behavior: "smooth" });
+});
+
+// 複製按鈕
+document.getElementById("copy-btn").addEventListener("click", function() {
+  const code = document.getElementById("result-code").textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const toast = document.getElementById("copy-toast");
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2000);
+  });
+});
+
+// === 初始化 ===
+parseParams();
+renderList("list-e", E_CODES);
+renderList("list-f", F_CODES);
+updateBudget();
+</script>
+</body>
+</html>
