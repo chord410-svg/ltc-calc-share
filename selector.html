@@ -21,10 +21,7 @@ body{font-family:-apple-system,"Noto Sans TC",sans-serif;background:var(--bg);co
 .bx{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,.5)}
 .bs{display:flex;justify-content:space-between;font-size:12px;margin-top:6px}
 .sec{background:var(--card);border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--brd)}
-.sec h2{font-size:14px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--brd);cursor:pointer;user-select:none}
-.sec h2::after{content:" ▼";font-size:10px;color:var(--mut)}
-.sec h2.collapsed::after{content:" ▶"}
-.sec .items.hidden{display:none}
+.sec h2{font-size:14px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--brd)}
 .di{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:8px}
 .di:last-child{border-bottom:none}
 .di .nm{flex:1;min-width:0}
@@ -171,9 +168,7 @@ function render(){
     const sec=document.createElement("div");sec.className="sec";
     const h2=document.createElement("h2");h2.textContent=cat.name+" ("+cat.items.length+")";
     const items=document.createElement("div");items.className="items";
-    // 預設收合 FA 和 FA2
-    if(cat.id==="FA"||cat.id==="FA2"||cat.id==="EE"||cat.id==="EF"){h2.classList.add("collapsed");items.classList.add("hidden")}
-    h2.onclick=()=>{h2.classList.toggle("collapsed");items.classList.toggle("hidden")};
+    // 全部展開，不折疊
     sec.appendChild(h2);
     cat.items.forEach(it=>{
       const d=document.createElement("div");d.className="di";
@@ -260,7 +255,7 @@ document.getElementById("sbtn").addEventListener("click",async function(){
   const rp=document.getElementById("rp");rp.classList.add("show");
   if(!ok)rp.querySelector("div:nth-child(2)").textContent="⚠️ 自動送出失敗，請複製推薦碼貼回 Discord";
   if(P.guild&&P.channel){
-    document.getElementById("dlink").href="https://discord.com/channels/"+P.guild+"/"+P.channel;
+    document.getElementById("dlink").href="discord:///channels/"+P.guild+"/"+P.channel;
   }
   rp.scrollIntoView({behavior:"smooth"});
 });
